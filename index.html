@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مشاهدة يوتيوب مع الأصدقاء</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 500px;
+      margin: 20px auto;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    input, button {
+      width: 90%;
+      margin: 10px auto;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      display: block;
+      outline: none;
+    }
+    input:focus {
+      border-color: #2575fc;
+    }
+    button {
+      background: #2575fc;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover { background: #1a5bb8; }
+    iframe {
+      width: 90%;
+      height: 400px;
+      border: none;
+      margin: 10px auto;
+      display: block;
+      border-radius: 5px;
+    }
+    .hidden { display: none; }
+    .room-list, .my-room-list {
+      text-align: center;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .room-list button, .my-room-list button {
+      width: 90%;
+      margin: 0 auto;
+    }
+    .btn-delete { background: #e74c3c; }
+    .btn-delete:hover { background: #c0392b; }
+    .section { margin: 15px 0; }
+    .section p { margin: 5px 0; }
+    #chat-section {
+      display: flex;
+      flex-direction: column;
+      height: 300px;
+    }
+    #comments-list {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      background: #f9f9f9;
+      text-align: right;
+    }
+    #comments-list p { margin: 5px 0; font-size: 14px; }
+    #chat-input-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    #chat-input-container input {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+    }
+    #chat-input-container button {
+      width: 60px;
+      padding: 12px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set, get, onValue, remove, push, query, orderByChild, off } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBq0Z-KTEa3ujPX931xe9HFS8g4CtUOXFk",
+      authDomain: "room-c4243.firebaseapp.com",
+      databaseURL: "https://room-c4243-default-rtdb.firebaseio.com",
+      projectId: "room-c4243",
+      storageBucket: "room-c4243.appspot.com",
+      messagingSenderId: "406074495303",
+      appId: "1:406074495303:web:010aaf4a7610e064ed7c62"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    window.currentRoomCode = null;
+    window.extractYouTubeID = function(url) {
+      let match = url.match(/(?:https?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
+      return match ? match[1] : null;
+    }
+
+    window.saveUsername = function() {
+      const username = document.getElementById("username-input").value.trim();
+      if(!username) {
+        alert("يرجى إدخال اسم المستخدم.");
+        return;
+      }
+      localStorage.setItem("username", username);
+      document.getElementById("username-section").classList.add("hidden");
+      document.getElementById("main-section").classList.remove("hidden");
+    }
+
+    window.createRoom = async function() {
+      const ownerName = document.getElementById("owner-name").value.trim();
+      const roomCode = document.getElementById("room-code").value.trim();
+      const videoLink = document.getElementById("youtube-link").value.trim();
+      const roomPassword = document.getElementById("room-password").value.trim();
+      if (!ownerName || !roomCode || !videoLink || !roomPassword) {
+        alert("يرجى إدخال جميع الحقول.");
+        return;
+      }
+      const videoId = extractYouTubeID(videoLink);
+      if (!videoId) {
+        alert("رابط يوتيوب غير صحيح.");
+        return;
+      }
+      const roomRef = ref(db, "rooms/" + roomCode);
+      const roomSnap = await get(roomRef);
+      if(roomSnap.exists()){
+        alert("رمز الغرفة موجود مسبقاً. اختر رمزاً آخر.");
+        return;
+      }
+      set(roomRef, {
+        owner: ownerName,
+        videoId: videoId,
+        password: roomPassword,
+        timestamp: Date.now()
+      }).then(() => {
+        let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
+        if(!myRooms.includes(roomCode)){
+          myRooms.push(roomCode);
+          localStorage.setItem("myRooms", JSON.stringify(myRooms));
+        }
+        alert("تم إنشاء الغرفة بنجاح!");
+        loadVideo(roomCode, { owner: ownerName, videoId: videoId });
+      }).catch(error => {
+        alert("حدث خطأ أثناء إنشاء الغرفة: " + error);
+      });
+    }
+
+    window.deleteRoom = async function() {
+      const roomCode = document.getElementById("room-code").value.trim();
+      const ownerName = document.getElementById("owner-name").value.trim();
+      if(!roomCode || !ownerName){
+        alert("يرجى إدخال رمز الغرفة واسمك.");
+        return;
+      }
+      const roomRef = ref(db, "rooms/" + roomCode);
+      const roomSnap = await get(roomRef);
+      if(!roomSnap.exists()){
+        alert("الغرفة غير موجودة.");
+        return;
+      }
+      const roomData = roomSnap.val();
+      if(roomData.owner !== ownerName){
+        alert("لا يمكنك حذف غرفة ليست من إنشائك.");
+        return;
+      }
+      remove(roomRef).then(() => {
+        let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
+        myRooms = myRooms.filter(code => code !== roomCode);
+        localStorage.setItem("myRooms", JSON.stringify(myRooms));
+        alert("تم حذف الغرفة بنجاح.");
+      }).catch(error => {
+        alert("حدث خطأ أثناء حذف الغرفة: " + error);
+      });
+    }
+
+    window.joinRoom = async function() {
+      const roomCode = document.getElementById("join-room-code").value.trim();
+      const joinRoomPassword = document.getElementById("join-room-password").value.trim();
+      if (!roomCode || !joinRoomPassword) {
+        alert("يرجى إدخال رمز الغرفة وكلمة المرور.");
+        return;
+      }
+      const roomRef = ref(db, "rooms/" + roomCode);
+      get(roomRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const roomData = snapshot.val();
+          if(roomData.password !== joinRoomPassword){
+            alert("كلمة المرور غير صحيحة.");
+            return;
+          }
+          loadVideo(roomCode, roomData);
+        } else {
+          alert("الغرفة غير موجودة.");
+        }
+      }).catch(error => {
+        alert("حدث خطأ أثناء البحث عن الغرفة: " + error);
+      });
+    }
+
+    window.listRooms = function() {
+      document.getElementById("my-room-list").classList.add("hidden");
+      const roomListDiv = document.getElementById("room-list");
+      roomListDiv.innerHTML = "";
+      get(ref(db, "rooms")).then(snapshot => {
+        if (!snapshot.exists()) {
+          roomListDiv.innerHTML = "<p>لا توجد غرف متاحة حاليًا.</p>";
+        } else {
+          snapshot.forEach(childSnapshot => {
+            let roomData = childSnapshot.val();
+            let btn = document.createElement("button");
+            btn.innerHTML = `<i class="fas fa-video"></i> غرفة ${childSnapshot.key} (${roomData.owner})`;
+            btn.onclick = () => {
+              const inputPass = prompt("أدخل كلمة مرور الغرفة:");
+              if(inputPass === roomData.password){
+                loadVideo(childSnapshot.key, roomData);
+              } else {
+                alert("كلمة المرور غير صحيحة.");
+              }
+            }
+            roomListDiv.appendChild(btn);
+          });
+        }
+        let backBtn = document.createElement("button");
+        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
+        backBtn.onclick = () => {
+          roomListDiv.innerHTML = "";
+          document.getElementById("join-room-section").classList.remove("hidden");
+        }
+        roomListDiv.appendChild(backBtn);
+        roomListDiv.classList.remove("hidden");
+      });
+    }
+
+    window.listMyRooms = function() {
+      document.getElementById("room-list").classList.add("hidden");
+      const myRoomListDiv = document.getElementById("my-room-list");
+      myRoomListDiv.innerHTML = "";
+      let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
+      if(myRooms.length === 0){
+        myRoomListDiv.innerHTML = "<p>لا توجد غرف خاصة بك.</p>";
+        let backBtn = document.createElement("button");
+        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
+        backBtn.onclick = () => {
+          myRoomListDiv.innerHTML = "";
+          document.getElementById("join-room-section").classList.remove("hidden");
+        }
+        myRoomListDiv.appendChild(backBtn);
+        myRoomListDiv.classList.remove("hidden");
+        return;
+      }
+      Promise.all(myRooms.map(roomCode => get(ref(db, "rooms/" + roomCode)))).then(snapshots => {
+        snapshots.forEach((snapshot, index) => {
+          if(snapshot.exists()){
+            let roomData = snapshot.val();
+            let btn = document.createElement("button");
+            btn.innerHTML = `<i class="fas fa-user"></i> غرفة ${myRooms[index]}`;
+            btn.onclick = () => {
+              const inputPass = prompt("أدخل كلمة مرور الغرفة:");
+              if(inputPass === roomData.password){
+                loadVideo(myRooms[index], roomData);
+              } else {
+                alert("كلمة المرور غير صحيحة.");
+              }
+            }
+            myRoomListDiv.appendChild(btn);
+          }
+        });
+        let backBtn = document.createElement("button");
+        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
+        backBtn.onclick = () => {
+          myRoomListDiv.innerHTML = "";
+          document.getElementById("join-room-section").classList.remove("hidden");
+        }
+        myRoomListDiv.appendChild(backBtn);
+        myRoomListDiv.classList.remove("hidden");
+      });
+    }
+
+    window.loadVideo = function(roomCode, roomData) {
+      window.currentRoomCode = roomCode;
+      document.getElementById("room-owner").innerText = roomData.owner;
+      document.getElementById("video-frame").src = `https://www.youtube-nocookie.com/embed/${roomData.videoId}?autoplay=1&rel=0`;
+      document.getElementById("video-section").classList.remove("hidden");
+      setupViewerPresence(roomCode);
+      setupComments(roomCode);
+    }
+
+    function setupViewerPresence(roomCode) {
+      const viewerId = "viewer_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+      const viewerRef = ref(db, "rooms/" + roomCode + "/viewers/" + viewerId);
+      set(viewerRef, true);
+      viewerRef.onDisconnect().remove();
+      onValue(ref(db, "rooms/" + roomCode + "/viewers"), snapshot => {
+        document.getElementById("viewer-count").innerText = snapshot.numChildren();
+      });
+    }
+
+    function setupComments(roomCode) {
+      const commentsRef = ref(db, "rooms/" + roomCode + "/comments");
+      off(commentsRef);
+      document.getElementById("btn-send-comment").onclick = function() {
+        const commentText = document.getElementById("comment-input").value.trim();
+        if(commentText === "") return;
+        push(commentsRef, {
+          username: localStorage.getItem("username"),
+          text: commentText,
+          timestamp: Date.now()
+        }).then(() => {
+          document.getElementById("comment-input").value = "";
+        }).catch(error => {
+          console.error("Error sending message:", error);
+        });
+      };
+      const commentsQuery = query(commentsRef, orderByChild("timestamp"));
+      onValue(commentsQuery, snapshot => {
+        const commentsDiv = document.getElementById("comments-list");
+        commentsDiv.innerHTML = "";
+        snapshot.forEach(child => {
+          const comment = child.val();
+          const p = document.createElement("p");
+          p.innerText = (comment.username ? comment.username + ": " : "") + comment.text;
+          commentsDiv.appendChild(p);
+        });
+        commentsDiv.scrollTop = commentsDiv.scrollHeight;
+      });
+    }
+  </script>
+</head>
+<body>
+  <div id="username-section" class="container">
+    <h2><i class="fas fa-user"></i> أدخل اسم المستخدم</h2>
+    <input type="text" id="username-input" placeholder="اسم المستخدم">
+    <button onclick="saveUsername()"><i class="fas fa-check"></i> حفظ</button>
+  </div>
+  <div id="main-section" class="container hidden">
+    <h2><i class="fas fa-home"></i> مشاهدة يوتيوب مع الأصدقاء</h2>
+    <div class="nav-buttons">
+      <button onclick="showCreateRoom()"><i class="fas fa-plus-circle"></i> إنشاء غرفة</button>
+      <button onclick="showJoinRoom()"><i class="fas fa-sign-in-alt"></i> البحث عن غرفة</button>
+    </div>
+  </div>
+  <div id="create-room-section" class="container hidden">
+    <h2><i class="fas fa-plus-circle"></i> إنشاء غرفة</h2>
+    <input type="text" id="owner-name" placeholder="اسمك">
+    <input type="text" id="room-code" placeholder="رمز الغرفة">
+    <input type="text" id="youtube-link" placeholder="رابط يوتيوب">
+    <input type="password" id="room-password" placeholder="كلمة مرور الغرفة">
+    <div class="nav-buttons">
+      <button onclick="createRoom()"><i class="fas fa-check"></i> إنشاء</button>
+      <button onclick="deleteRoom()" class="btn-delete"><i class="fas fa-trash"></i> حذف غرفتي</button>
+    </div>
+    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
+  </div>
+  <div id="join-room-section" class="container hidden">
+    <h2><i class="fas fa-sign-in-alt"></i> دخول الغرفة</h2>
+    <input type="text" id="join-room-code" placeholder="رمز الغرفة">
+    <input type="password" id="join-room-password" placeholder="كلمة مرور الغرفة">
+    <div class="nav-buttons">
+      <button onclick="joinRoom()"><i class="fas fa-check"></i> دخول</button>
+      <button onclick="listRooms()"><i class="fas fa-list"></i> عرض جميع الغرف</button>
+      <button onclick="listMyRooms()"><i class="fas fa-user"></i> غرفي</button>
+    </div>
+    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
+    <div id="room-list" class="room-list hidden"></div>
+    <div id="my-room-list" class="my-room-list hidden"></div>
+  </div>
+  <div id="video-section" class="container hidden">
+    <h2><i class="fas fa-video"></i> مشاهدة الفيديو</h2>
+    <p>المضيف: <span id="room-owner"></span></p>
+    <iframe id="video-frame" allowfullscreen></iframe>
+    <div class="section">
+      <p><i class="fas fa-users"></i> عدد المشاهدين: <span id="viewer-count">0</span></p>
+    </div>
+    <div class="section" id="chat-section">
+      <div id="comments-list"></div>
+      <div id="chat-input-container">
+        <input type="text" id="comment-input" placeholder="اكتب رسالتك هنا">
+        <button id="btn-send-comment"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
+  </div>
+  <script>
+    function hideAll() {
+      document.querySelectorAll(".container").forEach(el => el.classList.add("hidden"));
+    }
+    function goBack() {
+      hideAll();
+      if(localStorage.getItem("username")) {
+        document.getElementById("main-section").classList.remove("hidden");
+      } else {
+        document.getElementById("username-section").classList.remove("hidden");
+      }
+    }
+    function showCreateRoom() {
+      hideAll();
+      document.getElementById("create-room-section").classList.remove("hidden");
+    }
+    function showJoinRoom() {
+      hideAll();
+      document.getElementById("join-room-section").classList.remove("hidden");
+    }
+    window.addEventListener("load", function() {
+      if(localStorage.getItem("username")) {
+        document.getElementById("username-section").classList.add("hidden");
+        document.getElementById("main-section").classList.remove("hidden");
+      } else {
+        document.getElementById("username-section").classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
