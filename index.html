@@ -3,126 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مشاهدة يوتيوب مع الأصدقاء</title>
+  <title>دردشة المستخدمين</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * {
-      box-sizing: border-box;
-      direction: rtl;
-      margin: 0;
-      padding: 0;
-    }
     body {
       font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      background: #ECE5DD;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
       color: #333;
-      text-align: center;
-      padding: 20px;
     }
-    .container {
-      background: #fff;
-      color: #333;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      width: 100%;
-      max-width: 500px;
+    .chat-container {
+      max-width: 400px;
       margin: 20px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-    h2 {
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-    input, button {
-      width: 90%;
-      margin: 10px auto;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      display: block;
-      outline: none;
-    }
-    input:focus {
-      border-color: #2575fc;
-    }
-    button {
-      background: #2575fc;
+    .header {
+      background: #075E54;
+      padding: 15px;
       color: #fff;
-      cursor: pointer;
-      border: none;
-      transition: background 0.3s;
+      font-size: 18px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
-    button:hover { background: #1a5bb8; }
-    iframe {
-      width: 90%;
-      height: 400px;
+    .header a, .header button {
+      background: none;
       border: none;
-      margin: 10px auto;
-      display: block;
-      border-radius: 5px;
+      color: #fff;
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+      text-decoration: none;
     }
-    .hidden { display: none; }
-    .room-list, .my-room-list {
-      text-align: center;
-      margin-top: 10px;
+    .search-box {
+      padding: 10px;
+      background: #fff;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
     }
-    .room-list button, .my-room-list button {
-      width: 90%;
-      margin: 0 auto;
-    }
-    .btn-delete { background: #e74c3c; }
-    .btn-delete:hover { background: #c0392b; }
-    .section { margin: 15px 0; }
-    .section p { margin: 5px 0; }
-    #chat-section {
-      display: flex;
-      flex-direction: column;
-      height: 300px;
-    }
-    #comments-list {
+    #search-input {
       flex: 1;
-      overflow-y: auto;
+      padding: 8px;
       border: 1px solid #ddd;
       border-radius: 5px;
+      outline: none;
+      font-size: 14px;
+    }
+    #recent-chats-section {
       padding: 10px;
+      border-bottom: 1px solid #ddd;
       background: #f9f9f9;
-      text-align: right;
     }
-    #comments-list p { margin: 5px 0; font-size: 14px; }
-    #chat-input-container {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    #chat-input-container input {
-      flex: 1;
-      padding: 12px;
+    #recent-chats-section h3 {
+      margin: 0 0 10px 0;
       font-size: 16px;
     }
-    #chat-input-container button {
-      width: 60px;
-      padding: 12px;
+    #recent-chats-list {
+      max-height: 200px;
+      overflow-y: auto;
     }
-    .nav-buttons {
+    .user-item {
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .user-item:hover {
+      background: #e0e0e0;
+    }
+    .chat-messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #ECE5DD;
       display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
+      flex-direction: column;
+    }
+    .message {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    .message.sent {
+      background: #DCF8C6;
+      color: #000;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .message.received {
+      background: #fff;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    .message span {
+      font-size: 12px;
+      display: block;
+      margin-top: 3px;
+      color: #555;
+    }
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      outline: none;
+      font-size: 14px;
+    }
+    #send-button {
+      padding: 10px 15px;
+      background: #075E54;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 10px;
     }
   </style>
+</head>
+<body>
+  <div class="chat-container" id="search-section">
+    <div class="header" id="main-header">
+      <a href="YOUR_LINK_HERE" id="custom-back"><i class="fas fa-arrow-left"></i></a>
+      <span>المحادثات - </span>
+      <span id="user-info"></span>
+    </div>
+    <div id="recent-chats-section">
+      <h3>المحادثات الأخيرة</h3>
+      <div id="recent-chats-list"></div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="ابحث عن مستخدم">
+    </div>
+    <div id="user-list"></div>
+  </div>
+  <div class="chat-container" id="chat-section" style="display:none;">
+    <div class="header">
+      <button id="back-button"><i class="fas fa-arrow-right"></i></button>
+      <span id="chat-header-title"></span>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="input-area">
+      <input type="text" id="message-input" placeholder="اكتب رسالتك">
+      <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, onValue, remove, push, query, orderByChild, off } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
+    import { getDatabase, ref, set, push, onValue, query, orderByChild, get, off, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
     const firebaseConfig = {
       apiKey: "AIzaSyBq0Z-KTEa3ujPX931xe9HFS8g4CtUOXFk",
       authDomain: "room-c4243.firebaseapp.com",
@@ -132,327 +178,172 @@
       messagingSenderId: "406074495303",
       appId: "1:406074495303:web:010aaf4a7610e064ed7c62"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    window.currentRoomCode = null;
-    window.extractYouTubeID = function(url) {
-      let match = url.match(/(?:https?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/);
-      return match ? match[1] : null;
+    let userData = JSON.parse(localStorage.getItem("userData"));
+    if (!userData) {
+      let username = prompt("ادخل اسم المستخدم:");
+      if (!username || username.trim() === "") {
+        username = "مستخدم_" + Math.floor(Math.random() * 1000);
+      }
+      let userId = Math.floor(100 + Math.random() * 900);
+      userData = { username, userId };
+      localStorage.setItem("userData", JSON.stringify(userData));
     }
-
-    window.saveUsername = function() {
-      const username = document.getElementById("username-input").value.trim();
-      if(!username) {
-        alert("يرجى إدخال اسم المستخدم.");
-        return;
-      }
-      localStorage.setItem("username", username);
-      document.getElementById("username-section").classList.add("hidden");
-      document.getElementById("main-section").classList.remove("hidden");
+    set(ref(db, "chatUsers/" + userData.userId), {
+      username: userData.username,
+      userId: userData.userId
+    });
+    document.getElementById("user-info").textContent = `${userData.username} (${userData.userId})`;
+    const searchInput = document.getElementById("search-input");
+    const userListDiv = document.getElementById("user-list");
+    const recentChatsListDiv = document.getElementById("recent-chats-list");
+    const searchSection = document.getElementById("search-section");
+    const chatSection = document.getElementById("chat-section");
+    const chatHeaderTitle = document.getElementById("chat-header-title");
+    const chatMessagesDiv = document.getElementById("chat-messages");
+    const messageInput = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+    const backButton = document.getElementById("back-button");
+    let currentChatRef = null;
+    let currentChatListener = null;
+    function getChatKey(id1, id2) {
+      return (id1 < id2 ? id1 : id2) + "_" + (id1 < id2 ? id2 : id1);
     }
-
-    window.createRoom = async function() {
-      const ownerName = document.getElementById("owner-name").value.trim();
-      const roomCode = document.getElementById("room-code").value.trim();
-      const videoLink = document.getElementById("youtube-link").value.trim();
-      const roomPassword = document.getElementById("room-password").value.trim();
-      if (!ownerName || !roomCode || !videoLink || !roomPassword) {
-        alert("يرجى إدخال جميع الحقول.");
-        return;
-      }
-      const videoId = extractYouTubeID(videoLink);
-      if (!videoId) {
-        alert("رابط يوتيوب غير صحيح.");
-        return;
-      }
-      const roomRef = ref(db, "rooms/" + roomCode);
-      const roomSnap = await get(roomRef);
-      if(roomSnap.exists()){
-        alert("رمز الغرفة موجود مسبقاً. اختر رمزاً آخر.");
-        return;
-      }
-      set(roomRef, {
-        owner: ownerName,
-        videoId: videoId,
-        password: roomPassword,
-        timestamp: Date.now()
-      }).then(() => {
-        let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
-        if(!myRooms.includes(roomCode)){
-          myRooms.push(roomCode);
-          localStorage.setItem("myRooms", JSON.stringify(myRooms));
-        }
-        alert("تم إنشاء الغرفة بنجاح!");
-        loadVideo(roomCode, { owner: ownerName, videoId: videoId });
-      }).catch(error => {
-        alert("حدث خطأ أثناء إنشاء الغرفة: " + error);
-      });
-    }
-
-    window.deleteRoom = async function() {
-      const roomCode = document.getElementById("room-code").value.trim();
-      const ownerName = document.getElementById("owner-name").value.trim();
-      if(!roomCode || !ownerName){
-        alert("يرجى إدخال رمز الغرفة واسمك.");
-        return;
-      }
-      const roomRef = ref(db, "rooms/" + roomCode);
-      const roomSnap = await get(roomRef);
-      if(!roomSnap.exists()){
-        alert("الغرفة غير موجودة.");
-        return;
-      }
-      const roomData = roomSnap.val();
-      if(roomData.owner !== ownerName){
-        alert("لا يمكنك حذف غرفة ليست من إنشائك.");
-        return;
-      }
-      remove(roomRef).then(() => {
-        let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
-        myRooms = myRooms.filter(code => code !== roomCode);
-        localStorage.setItem("myRooms", JSON.stringify(myRooms));
-        alert("تم حذف الغرفة بنجاح.");
-      }).catch(error => {
-        alert("حدث خطأ أثناء حذف الغرفة: " + error);
-      });
-    }
-
-    window.joinRoom = async function() {
-      const roomCode = document.getElementById("join-room-code").value.trim();
-      const joinRoomPassword = document.getElementById("join-room-password").value.trim();
-      if (!roomCode || !joinRoomPassword) {
-        alert("يرجى إدخال رمز الغرفة وكلمة المرور.");
-        return;
-      }
-      const roomRef = ref(db, "rooms/" + roomCode);
-      get(roomRef).then(snapshot => {
-        if (snapshot.exists()) {
-          const roomData = snapshot.val();
-          if(roomData.password !== joinRoomPassword){
-            alert("كلمة المرور غير صحيحة.");
-            return;
-          }
-          loadVideo(roomCode, roomData);
-        } else {
-          alert("الغرفة غير موجودة.");
-        }
-      }).catch(error => {
-        alert("حدث خطأ أثناء البحث عن الغرفة: " + error);
-      });
-    }
-
-    window.listRooms = function() {
-      document.getElementById("my-room-list").classList.add("hidden");
-      const roomListDiv = document.getElementById("room-list");
-      roomListDiv.innerHTML = "";
-      get(ref(db, "rooms")).then(snapshot => {
-        if (!snapshot.exists()) {
-          roomListDiv.innerHTML = "<p>لا توجد غرف متاحة حاليًا.</p>";
-        } else {
-          snapshot.forEach(childSnapshot => {
-            let roomData = childSnapshot.val();
-            let btn = document.createElement("button");
-            btn.innerHTML = `<i class="fas fa-video"></i> غرفة ${childSnapshot.key} (${roomData.owner})`;
-            btn.onclick = () => {
-              const inputPass = prompt("أدخل كلمة مرور الغرفة:");
-              if(inputPass === roomData.password){
-                loadVideo(childSnapshot.key, roomData);
-              } else {
-                alert("كلمة المرور غير صحيحة.");
-              }
-            }
-            roomListDiv.appendChild(btn);
-          });
-        }
-        let backBtn = document.createElement("button");
-        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
-        backBtn.onclick = () => {
-          roomListDiv.innerHTML = "";
-          document.getElementById("join-room-section").classList.remove("hidden");
-        }
-        roomListDiv.appendChild(backBtn);
-        roomListDiv.classList.remove("hidden");
-      });
-    }
-
-    window.listMyRooms = function() {
-      document.getElementById("room-list").classList.add("hidden");
-      const myRoomListDiv = document.getElementById("my-room-list");
-      myRoomListDiv.innerHTML = "";
-      let myRooms = JSON.parse(localStorage.getItem("myRooms") || "[]");
-      if(myRooms.length === 0){
-        myRoomListDiv.innerHTML = "<p>لا توجد غرف خاصة بك.</p>";
-        let backBtn = document.createElement("button");
-        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
-        backBtn.onclick = () => {
-          myRoomListDiv.innerHTML = "";
-          document.getElementById("join-room-section").classList.remove("hidden");
-        }
-        myRoomListDiv.appendChild(backBtn);
-        myRoomListDiv.classList.remove("hidden");
-        return;
-      }
-      Promise.all(myRooms.map(roomCode => get(ref(db, "rooms/" + roomCode)))).then(snapshots => {
-        snapshots.forEach((snapshot, index) => {
-          if(snapshot.exists()){
-            let roomData = snapshot.val();
-            let btn = document.createElement("button");
-            btn.innerHTML = `<i class="fas fa-user"></i> غرفة ${myRooms[index]}`;
-            btn.onclick = () => {
-              const inputPass = prompt("أدخل كلمة مرور الغرفة:");
-              if(inputPass === roomData.password){
-                loadVideo(myRooms[index], roomData);
-              } else {
-                alert("كلمة المرور غير صحيحة.");
-              }
-            }
-            myRoomListDiv.appendChild(btn);
+    function loadRecentChats() {
+      recentChatsListDiv.innerHTML = "";
+      let recentChats = JSON.parse(localStorage.getItem("recentChats")) || [];
+      recentChats.forEach(user => {
+        const userDiv = document.createElement("div");
+        userDiv.classList.add("user-item");
+        userDiv.textContent = `${user.username} (${user.userId})`;
+        userDiv.onclick = () => {
+          openPrivateChat(user);
+        };
+        attachLongPress(userDiv, () => {
+          if(confirm("هل تريد حذف هذا الشخص من المحادثات الأخيرة؟")){
+            let chats = JSON.parse(localStorage.getItem("recentChats")) || [];
+            chats = chats.filter(u => u.userId !== user.userId);
+            localStorage.setItem("recentChats", JSON.stringify(chats));
+            loadRecentChats();
           }
         });
-        let backBtn = document.createElement("button");
-        backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> رجوع`;
-        backBtn.onclick = () => {
-          myRoomListDiv.innerHTML = "";
-          document.getElementById("join-room-section").classList.remove("hidden");
+        recentChatsListDiv.appendChild(userDiv);
+      });
+    }
+    function addRecentChat(targetUser) {
+      let recentChats = JSON.parse(localStorage.getItem("recentChats")) || [];
+      if (!recentChats.find(u => u.userId === targetUser.userId)) {
+        recentChats.push(targetUser);
+        localStorage.setItem("recentChats", JSON.stringify(recentChats));
+        loadRecentChats();
+      }
+    }
+    loadRecentChats();
+    searchInput.oninput = function() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      userListDiv.innerHTML = "";
+      if (searchTerm === "") return;
+      let addedUserIds = new Set();
+      let recentChats = JSON.parse(localStorage.getItem("recentChats")) || [];
+      get(ref(db, "chatUsers")).then(snapshot => {
+        let hasResult = false;
+        snapshot.forEach(child => {
+          const user = child.val();
+          if (user.userId == userData.userId) return;
+          if (recentChats.find(u => u.userId === user.userId)) return;
+          if (addedUserIds.has(user.userId)) return;
+          if (user.username.toLowerCase().includes(searchTerm) || user.userId.toString().includes(searchTerm)) {
+            hasResult = true;
+            addedUserIds.add(user.userId);
+            const userDiv = document.createElement("div");
+            userDiv.classList.add("user-item");
+            userDiv.textContent = `${user.username} (${user.userId})`;
+            userDiv.onclick = () => {
+              openPrivateChat(user);
+            };
+            userListDiv.appendChild(userDiv);
+          }
+        });
+        if (!hasResult) {
+          const noResultDiv = document.createElement("div");
+          noResultDiv.classList.add("user-item");
+          noResultDiv.textContent = "لا يوجد مستخدمين مطابقين";
+          userListDiv.appendChild(noResultDiv);
         }
-        myRoomListDiv.appendChild(backBtn);
-        myRoomListDiv.classList.remove("hidden");
+      });
+    };
+    function attachLongPress(element, callback) {
+      let pressTimer = null;
+      element.addEventListener('mousedown', function(e) {
+        pressTimer = window.setTimeout(callback, 1000);
+      });
+      element.addEventListener('mouseup', function(e) {
+        clearTimeout(pressTimer);
+      });
+      element.addEventListener('mouseout', function(e) {
+        clearTimeout(pressTimer);
+      });
+      element.addEventListener('touchstart', function(e) {
+        pressTimer = window.setTimeout(callback, 1000);
+      });
+      element.addEventListener('touchend', function(e) {
+        clearTimeout(pressTimer);
       });
     }
-
-    window.loadVideo = function(roomCode, roomData) {
-      window.currentRoomCode = roomCode;
-      document.getElementById("room-owner").innerText = roomData.owner;
-      document.getElementById("video-frame").src = `https://www.youtube-nocookie.com/embed/${roomData.videoId}?autoplay=1&rel=0`;
-      document.getElementById("video-section").classList.remove("hidden");
-      setupViewerPresence(roomCode);
-      setupComments(roomCode);
-    }
-
-    function setupViewerPresence(roomCode) {
-      const viewerId = "viewer_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-      const viewerRef = ref(db, "rooms/" + roomCode + "/viewers/" + viewerId);
-      set(viewerRef, true);
-      viewerRef.onDisconnect().remove();
-      onValue(ref(db, "rooms/" + roomCode + "/viewers"), snapshot => {
-        document.getElementById("viewer-count").innerText = snapshot.numChildren();
+    function openPrivateChat(targetUser) {
+      addRecentChat(targetUser);
+      searchSection.style.display = "none";
+      chatSection.style.display = "flex";
+      chatHeaderTitle.textContent = `${targetUser.username} (${targetUser.userId})`;
+      chatMessagesDiv.innerHTML = "";
+      const chatKey = getChatKey(userData.userId, targetUser.userId);
+      currentChatRef = ref(db, "privateChats/" + chatKey);
+      if (currentChatListener) {
+        off(currentChatRef, 'value', currentChatListener);
+      }
+      const messagesQuery = query(currentChatRef, orderByChild("timestamp"));
+      currentChatListener = onValue(messagesQuery, snapshot => {
+        chatMessagesDiv.innerHTML = "";
+        snapshot.forEach(child => {
+          const msg = child.val();
+          const msgDiv = document.createElement("div");
+          msgDiv.classList.add("message");
+          msgDiv.classList.add(msg.userId === userData.userId ? "sent" : "received");
+          msgDiv.setAttribute("data-key", child.key);
+          msgDiv.innerHTML = `<b>${msg.username} (${msg.userId})</b> ${msg.text}<span>${new Date(msg.timestamp).toLocaleTimeString()}</span>`;
+          attachLongPress(msgDiv, () => {
+            if(confirm("هل تريد حذف الرسالة؟")){
+              const msgKey = msgDiv.getAttribute("data-key");
+              remove(ref(db, "privateChats/" + chatKey + "/" + msgKey));
+            }
+          });
+          chatMessagesDiv.appendChild(msgDiv);
+        });
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
       });
-    }
-
-    function setupComments(roomCode) {
-      const commentsRef = ref(db, "rooms/" + roomCode + "/comments");
-      off(commentsRef);
-      document.getElementById("btn-send-comment").onclick = function() {
-        const commentText = document.getElementById("comment-input").value.trim();
-        if(commentText === "") return;
-        push(commentsRef, {
-          username: localStorage.getItem("username"),
-          text: commentText,
+      sendButton.onclick = function() {
+        const text = messageInput.value.trim();
+        if (text === "") return;
+        push(currentChatRef, {
+          username: userData.username,
+          userId: userData.userId,
+          text: text,
           timestamp: Date.now()
         }).then(() => {
-          document.getElementById("comment-input").value = "";
-        }).catch(error => {
-          console.error("Error sending message:", error);
+          messageInput.value = "";
         });
       };
-      const commentsQuery = query(commentsRef, orderByChild("timestamp"));
-      onValue(commentsQuery, snapshot => {
-        const commentsDiv = document.getElementById("comments-list");
-        commentsDiv.innerHTML = "";
-        snapshot.forEach(child => {
-          const comment = child.val();
-          const p = document.createElement("p");
-          p.innerText = (comment.username ? comment.username + ": " : "") + comment.text;
-          commentsDiv.appendChild(p);
-        });
-        commentsDiv.scrollTop = commentsDiv.scrollHeight;
-      });
     }
-  </script>
-</head>
-<body>
-  <div id="username-section" class="container">
-    <h2><i class="fas fa-user"></i> أدخل اسم المستخدم</h2>
-    <input type="text" id="username-input" placeholder="اسم المستخدم">
-    <button onclick="saveUsername()"><i class="fas fa-check"></i> حفظ</button>
-  </div>
-  <div id="main-section" class="container hidden">
-    <h2><i class="fas fa-home"></i> مشاهدة يوتيوب مع الأصدقاء</h2>
-    <div class="nav-buttons">
-      <button onclick="showCreateRoom()"><i class="fas fa-plus-circle"></i> إنشاء غرفة</button>
-      <button onclick="showJoinRoom()"><i class="fas fa-sign-in-alt"></i> البحث عن غرفة</button>
-    </div>
-  </div>
-  <div id="create-room-section" class="container hidden">
-    <h2><i class="fas fa-plus-circle"></i> إنشاء غرفة</h2>
-    <input type="text" id="owner-name" placeholder="اسمك">
-    <input type="text" id="room-code" placeholder="رمز الغرفة">
-    <input type="text" id="youtube-link" placeholder="رابط يوتيوب">
-    <input type="password" id="room-password" placeholder="كلمة مرور الغرفة">
-    <div class="nav-buttons">
-      <button onclick="createRoom()"><i class="fas fa-check"></i> إنشاء</button>
-      <button onclick="deleteRoom()" class="btn-delete"><i class="fas fa-trash"></i> حذف غرفتي</button>
-    </div>
-    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
-  </div>
-  <div id="join-room-section" class="container hidden">
-    <h2><i class="fas fa-sign-in-alt"></i> دخول الغرفة</h2>
-    <input type="text" id="join-room-code" placeholder="رمز الغرفة">
-    <input type="password" id="join-room-password" placeholder="كلمة مرور الغرفة">
-    <div class="nav-buttons">
-      <button onclick="joinRoom()"><i class="fas fa-check"></i> دخول</button>
-      <button onclick="listRooms()"><i class="fas fa-list"></i> عرض جميع الغرف</button>
-      <button onclick="listMyRooms()"><i class="fas fa-user"></i> غرفي</button>
-    </div>
-    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
-    <div id="room-list" class="room-list hidden"></div>
-    <div id="my-room-list" class="my-room-list hidden"></div>
-  </div>
-  <div id="video-section" class="container hidden">
-    <h2><i class="fas fa-video"></i> مشاهدة الفيديو</h2>
-    <p>المضيف: <span id="room-owner"></span></p>
-    <iframe id="video-frame" allowfullscreen></iframe>
-    <div class="section">
-      <p><i class="fas fa-users"></i> عدد المشاهدين: <span id="viewer-count">0</span></p>
-    </div>
-    <div class="section" id="chat-section">
-      <div id="comments-list"></div>
-      <div id="chat-input-container">
-        <input type="text" id="comment-input" placeholder="اكتب رسالتك هنا">
-        <button id="btn-send-comment"><i class="fas fa-paper-plane"></i></button>
-      </div>
-    </div>
-    <button onclick="goBack()"><i class="fas fa-arrow-left"></i> رجوع</button>
-  </div>
-  <script>
-    function hideAll() {
-      document.querySelectorAll(".container").forEach(el => el.classList.add("hidden"));
-    }
-    function goBack() {
-      hideAll();
-      if(localStorage.getItem("username")) {
-        document.getElementById("main-section").classList.remove("hidden");
-      } else {
-        document.getElementById("username-section").classList.remove("hidden");
+    backButton.onclick = function() {
+      if (currentChatRef && currentChatListener) {
+        off(currentChatRef, 'value', currentChatListener);
       }
-    }
-    function showCreateRoom() {
-      hideAll();
-      document.getElementById("create-room-section").classList.remove("hidden");
-    }
-    function showJoinRoom() {
-      hideAll();
-      document.getElementById("join-room-section").classList.remove("hidden");
-    }
-    window.addEventListener("load", function() {
-      if(localStorage.getItem("username")) {
-        document.getElementById("username-section").classList.add("hidden");
-        document.getElementById("main-section").classList.remove("hidden");
-      } else {
-        document.getElementById("username-section").classList.remove("hidden");
-      }
-    });
+      chatSection.style.display = "none";
+      searchSection.style.display = "flex";
+      messageInput.value = "";
+      chatMessagesDiv.innerHTML = "";
+    };
   </script>
 </body>
 </html>
